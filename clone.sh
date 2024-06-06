@@ -80,7 +80,7 @@ read -p "Pilih disk yang akan digunakan (Contoh: /dev/sda): " chosen_disk
 echo -e "\033[0m"
 # Validasi pilihan disk dengan menggunakan ekspresi reguler
 if ! [[ $chosen_disk =~ ^/dev/[a-z]{3}$ ]]; then
-    echo -e "\033[31mPilihan disk tidak valid. Format yang diharapkan: /dev/sdX atau /dev/mmcblkX\033[0m"
+    echo -e "\033[31mPilihan disk tidak valid. Format yang diharapkan: /dev/sdX\033[0m"
     exit 1
 fi
 
@@ -89,17 +89,17 @@ read -p "Masukkan ukuran partisi BOOT (Contoh: 50M): " size_boot
 read -p "Masukkan ukuran partisi ROOT (Contoh: 1M sd 100%): " size_root
 
 read -p "Masukkan label untuk partisi BOOT (Contoh: BOOT): " label_boot
-read -p "Masukkan label untuk partisi ROOT (Contoh: ROOTFS / EMMC_ROOT): " label_root
+read -p "Masukkan label untuk partisi ROOT (Contoh: ROOTFS): " label_root
 echo -e "\033[0m"
 
 format_partisi "$chosen_disk" "$size_boot" "$size_root" "$label_boot" "$label_root"
 klon_sistem "$chosen_disk" "$label_boot" "$label_root"
 
 echo "Mengupdate fstab..."
-BOOT_UUID=$(blkid -s UUID -o value "${chosen_disk}1")
-ROOT_UUID=$(blkid -s UUID -o value "${chosen_disk}2")
-sed -i "s|^UUID=[^ ]* /boot|UUID=${BOOT_UUID} /boot|" /ddbr/clone/etc/fstab
-sed -i "s|^UUID=[^ ]* /|UUID=${ROOT_UUID} /|" /ddbr/clone/etc/fstab
+BOOT_UUID=$(blkid -s UUID -o value "${dev}1")
+ROOT_UUID=$(blkid -s UUID -o value "${dev}2")
+sed -i "s|^UUID=[^ ]* /boot|UUID=${BOOT_UUID} /boot|" $DIR_CLONE/etc/fstab
+sed -i "s|^UUID=[^ ]* /|UUID=${ROOT_UUID} /|" $DIR_CLONE/etc/fstab
 sync
 
 umount $DIR_CLONE
