@@ -98,8 +98,8 @@ klon_sistem "$chosen_disk" "$label_boot" "$label_root"
 echo "Mengupdate fstab..."
 BOOT_UUID=$(blkid -s UUID -o value "${PART_BOOT}")
 ROOT_UUID=$(blkid -s UUID -o value "${PART_ROOT}")
-sed -i "s|^UUID=[^ ]* /boot|UUID=${BOOT_UUID} /boot|" $DIR_CLONE/etc/fstab
 sed -i "s|^UUID=[^ ]* /|UUID=${ROOT_UUID} /|" $DIR_CLONE/etc/fstab
+sed -i "s|^UUID=[^ ]* /boot|UUID=${BOOT_UUID} /boot|" $DIR_CLONE/etc/fstab
 sync
 
 umount $DIR_CLONE
