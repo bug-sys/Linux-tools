@@ -96,8 +96,8 @@ format_partisi "$chosen_disk" "$size_boot" "$size_root" "$label_boot" "$label_ro
 klon_sistem "$chosen_disk" "$label_boot" "$label_root"
 
 echo "Mengupdate fstab..."
-BOOT_UUID=$(blkid -s UUID -o value "${dev}1")
-ROOT_UUID=$(blkid -s UUID -o value "${dev}2")
+BOOT_UUID=$(blkid -s UUID -o value "${PART_BOOT}")
+ROOT_UUID=$(blkid -s UUID -o value "${PART_ROOT}")
 sed -i "s|^UUID=[^ ]* /boot|UUID=${BOOT_UUID} /boot|" $DIR_CLONE/etc/fstab
 sed -i "s|^UUID=[^ ]* /|UUID=${ROOT_UUID} /|" $DIR_CLONE/etc/fstab
 sync
