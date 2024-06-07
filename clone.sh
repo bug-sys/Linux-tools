@@ -17,7 +17,7 @@ format_partisi() {
 
     echo "Memulai pembuatan MBR dan partisi pada $dev"
     parted -s "$dev" mklabel msdos
-    parted -s "$dev" mkpart primary fat32 1M "$size_boot"
+    parted -s "$dev" mkpart primary fat32 50M "$size_boot"
     parted -s "$dev" mkpart primary ext4 "$size_boot" "$size_root"
     sync
 
