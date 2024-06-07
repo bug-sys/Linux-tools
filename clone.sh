@@ -85,7 +85,7 @@ if ! [[ $chosen_disk =~ ^/dev/[a-z]{3}$ ]]; then
 fi
 
 echo -e "\033[33m"
-read -p "Masukkan ukuran partisi BOOT (Contoh: 50M): " size_boot
+read -p "Masukkan ukuran partisi BOOT (Contoh: 100M): " size_boot
 read -p "Masukkan ukuran partisi ROOT (Contoh: 1M sd 100%): " size_root
 
 read -p "Masukkan label untuk partisi BOOT (Contoh: BOOT): " label_boot
