@@ -17,7 +17,7 @@ format_partisi() {
 
     echo "Memulai pembuatan MBR dan partisi pada $dev"
     parted -s "$dev" mklabel msdos
-    parted -s "$dev" mkpart primary fat32 50M "$size_boot"
+    parted -s "$dev" mkpart primary fat32 450M "$size_boot"
     parted -s "$dev" mkpart primary ext4 "$size_boot" "$size_root"
     sync
 
@@ -85,8 +85,8 @@ if ! [[ $chosen_disk =~ ^/dev/[a-z]{3}$ ]]; then
 fi
 
 echo -e "\033[33m"
-read -p "Masukkan ukuran partisi BOOT (Contoh: 100M): " size_boot
-read -p "Masukkan ukuran partisi ROOT (Contoh: 1M sd 100%): " size_root
+read -p "Masukkan ukuran partisi BOOT (Contoh: 500M): " size_boot
+read -p "Masukkan ukuran partisi ROOT (Contoh: 500M sd 100%): " size_root
 
 read -p "Masukkan label untuk partisi BOOT (Contoh: BOOT): " label_boot
 read -p "Masukkan label untuk partisi ROOT (Contoh: ROOTFS): " label_root
