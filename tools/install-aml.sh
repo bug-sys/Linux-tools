@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 # Fungsi untuk menampilkan daftar disk yang tersedia
 daftar_disk() {
