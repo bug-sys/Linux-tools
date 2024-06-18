@@ -100,14 +100,16 @@ finalize_installation() {
     # Unmount direktori instalasi
     umount $DIR_INSTALL
 
-    echo "Instalasi selesai, sistem akan me-reboot dalam 5 detik..."
+echo "*******************************************"
+echo -e '\033[36mInstalasi selesai,\033[33m Rebooting\033[0m'
+echo "*******************************************"
     sleep 5
     reboot
 }
 
 # Skrip utama
 echo -e "\033[32m*****************************************************"
-echo -e "\033[36m     Toolkit install eMMC Linux by bug-sys\033[0m"
+echo -e "\033[36m  Toolkit Install armbian ke Internal by bug-sys\033[0m"
 echo -e "\033[32m*****************************************************\033[0m"
 
 echo "Daftar disk yang tersedia: "
