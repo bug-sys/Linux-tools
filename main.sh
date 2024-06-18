@@ -9,13 +9,13 @@ read choice
 case "$choice" in
     1)
         echo "Menjalankan skrip clone.sh..."
-        chmod +x "/tools/clone.sh"  # Memberikan izin eksekusi pada skrip
-        "/tools/clone.sh"  # Memanggil skrip dari direktori /tools/
+        chmod +x "./tools/clone.sh"  # Memberikan izin eksekusi pada skrip
+        "./tools/clone.sh"  # Memanggil skrip dari direktori /tools/
         ;;
     2)
         echo "Menjalankan skrip install-aml.sh..."
-        chmod +x "/tools/install-aml.sh"  # Memberikan izin eksekusi pada skrip
-        "/tools/install-aml.sh"  # Memanggil skrip dari direktori /tools/
+        chmod +x "./tools/install-aml.sh"  # Memberikan izin eksekusi pada skrip
+        "./tools/install-aml.sh"  # Memanggil skrip dari direktori /tools/
         ;;
     *)
         echo "Pilihan tidak valid. Silakan masukkan 1 atau 2."
