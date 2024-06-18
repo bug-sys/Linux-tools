@@ -56,7 +56,7 @@ sed -e "s/ROOTFS/ROOT_EMMC/g" \
  -i "$DIR_INSTALL/uEnv.ini"
 echo "done."
 
-rm $DIR_INSTALL/s8*
+rm $DIR_INSTALL/s9*
 rm $DIR_INSTALL/aml*
 
 umount $DIR_INSTALL
@@ -78,12 +78,8 @@ mount -o rw $PART_ROOT $DIR_INSTALL
 cd /
 echo "Copy BIN"
 tar -cf - bin | (cd $DIR_INSTALL; tar -xpf -)
-#echo "Copy BOOT"
-#mkdir -p $DIR_INSTALL/boot
-#tar -cf - boot | (cd $DIR_INSTALL; tar -xpf -)
 echo "Create DEV"
 mkdir -p $DIR_INSTALL/dev
-#tar -cf - dev | (cd $DIR_INSTALL; tar -xpf -)
 echo "Copy ETC"
 tar -cf - etc | (cd $DIR_INSTALL; tar -xpf -)
 echo "Copy HOME"
@@ -94,10 +90,8 @@ echo "Copy LIB64"
 tar -cf - lib64 | (cd $DIR_INSTALL; tar -xpf -)
 echo "Create MEDIA"
 mkdir -p $DIR_INSTALL/media
-#tar -cf - media | (cd $DIR_INSTALL; tar -xpf -)
 echo "Create MNT"
 mkdir -p $DIR_INSTALL/mnt
-#tar -cf - mnt | (cd $DIR_INSTALL; tar -xpf -)
 echo "Copy OPT"
 tar -cf - opt | (cd $DIR_INSTALL; tar -xpf -)
 echo "Create PROC"
@@ -127,7 +121,7 @@ echo "Copy fstab"
 rm $DIR_INSTALL/etc/fstab
 cp -a /root/install/fstab $DIR_INSTALL/etc/fstab
 
-rm $DIR_INSTALL/root/install/fstab
+rm $DIR_INSTALL/root/linux-tools/fstab
 rm $DIR_INSTALL/usr/bin/ddbr
 
 cd /
@@ -136,7 +130,7 @@ sync
 umount $DIR_INSTALL
 
 echo "*******************************************"
-echo -e '\033[36mInstall complete,\033[33m Rebooting\033[0m'
+echo -e '\033[36mInstall selesai,\033[33m Rebooting\033[0m'
 echo "*******************************************"
 sleep 5
 reboot
