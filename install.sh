@@ -1,125 +1,128 @@
 #!/bin/sh
 
-echo "Start script create MBR and filesystem"
-DEV_EMMC=/dev/mmcblk1
+# Fungsi untuk menampilkan daftar disk yang tersedia
+daftar_disk() {
+    lsblk -d -o NAME,SIZE,TYPE | awk '/disk/ {print}'
+}
 
-echo "Start backup u-boot default"
-dd if="${DEV_EMMC}" of=/boot/u-boot-default.img bs=1M count=4
+# Fungsi untuk memformat disk, membuat partisi, dan memulihkan u-boot
+setup_disk() {
+    echo "Mulai memformat disk, membuat partisi, dan memulihkan u-boot..."
 
-echo "Start create MBR and partittion"
-parted -s "${DEV_EMMC}" mklabel msdos
-parted -s "${DEV_EMMC}" mkpart primary fat32 700M 828M
-parted -s "${DEV_EMMC}" mkpart primary ext4 829M 100%
+    chosen_disk=$(lsblk -d -n -o NAME | sed -n "${disk_number}p")
 
-echo "Start restore u-boot"
-dd if=/boot/u-boot-default.img of="${DEV_EMMC}" conv=fsync bs=1 count=442
-dd if=/boot/u-boot-default.img of="${DEV_EMMC}" conv=fsync bs=512 skip=1 seek=1
-sync
-echo "Done"
+    # Validasi disk yang dipilih
+    if [ -z "$chosen_disk" ]; then
+        echo -e "\033[31mError: Disk tidak ditemukan.\033[0m"
+        exit 1
+    fi
 
-echo "Start copy system for eMMC."
-mkdir -p /ddbr
-chmod 777 /ddbr
+    # Memformat disk dengan sistem file ext4
+    mkfs.ext4 -F $chosen_disk
 
-PART_BOOT="${DEV_EMMC}p1"
-PART_ROOT="${DEV_EMMC}p2"
-DIR_INSTALL="/ddbr/install"
+    # Membuat label MBR dan partisi-partisi pada disk
+    parted -s "${chosen_disk}" mklabel msdos
+    parted -s "${chosen_disk}" mkpart primary fat32 700M 828M
+    parted -s "${chosen_disk}" mkpart primary ext4 829M 100%
 
-if [ -d $DIR_INSTALL ] ; then
-    rm -rf $DIR_INSTALL
+    # Membackup u-boot default dari disk
+    dd if="${chosen_disk}" of=/boot/u-boot-default.img bs=1M count=4
+
+    # Memulihkan u-boot yang telah dibackup ke disk
+    dd if=/boot/u-boot-default.img of="${chosen_disk}" conv=fsync bs=1 count=442
+    dd if=/boot/u-boot-default.img of="${chosen_disk}" conv=fsync bs=512 skip=1 seek=1
+    sync
+
+    echo "Selesai memformat disk dan memulihkan u-boot."
+}
+
+# Fungsi untuk menyalin sistem operasi ke partisi yang telah dibuat
+copy_system() {
+    echo "Mulai menyalin sistem operasi ke eMMC..."
+
+    PART_BOOT="${chosen_disk}p1"
+    PART_ROOT="${chosen_disk}p2"
+    DIR_INSTALL="/ddbr/install"
+
+    # Validasi direktori instalasi
+    if [ ! -d "$DIR_INSTALL" ]; then
+        mkdir -p $DIR_INSTALL
+    fi
+
+    # Memastikan partisi boot tidak ter-mount
+    if mount | grep -q $PART_BOOT ; then
+        umount -f $PART_BOOT
+    fi
+
+    # Memformat partisi boot sebagai FAT32
+    echo -n "Memformat partisi BOOT..."
+    mkfs.vfat -n "BOOT_EMMC" $PART_BOOT
+    echo "selesai."
+
+    # Mount partisi boot untuk menyalin file
+    mount -o rw $PART_BOOT $DIR_INSTALL
+
+    # Menyalin isi direktori /boot ke partisi boot
+    echo -n "Menyalin BOOT..."
+    cp -r /boot/* $DIR_INSTALL && sync
+    echo "selesai."
+
+    # Mengedit konfigurasi uEnv.ini
+    echo -n "Mengedit konfigurasi init..."
+    sed -e "s/ROOTFS/ROOT_EMMC/g" -i "$DIR_INSTALL/uEnv.ini"
+    echo "selesai."
+
+    # Membersihkan file yang tidak diperlukan
+    rm -f $DIR_INSTALL/s9*
+    rm -f $DIR_INSTALL/s8*
+    rm -f $DIR_INSTALL/aml*
+
+    # Unmount partisi boot
+    umount $DIR_INSTALL
+    sync
+
+    echo "Selesai menyalin sistem operasi ke eMMC."
+}
+
+# Fungsi untuk menyelesaikan instalasi dengan membersihkan dan menyiapkan reboot
+finalize_installation() {
+    echo "Menyelesaikan instalasi dan menyiapkan untuk reboot..."
+
+    # Membersihkan file-file yang tidak diperlukan
+    rm $DIR_INSTALL/etc/fstab
+    cp -a /root/install/fstab $DIR_INSTALL/etc/fstab
+
+    rm $DIR_INSTALL/root/linux-tools/fstab
+    rm $DIR_INSTALL/usr/bin/ddbr
+
+    sync
+
+    # Unmount direktori instalasi
+    umount $DIR_INSTALL
+
+    echo "Instalasi selesai, sistem akan me-reboot dalam 5 detik..."
+    sleep 5
+    reboot
+}
+
+# Skrip utama
+echo -e "\033[32m*****************************************************"
+echo -e "\033[36m     Toolkit install eMMC Linux by bug-sys\033[0m"
+echo -e "\033[32m*****************************************************\033[0m"
+
+echo "Daftar disk yang tersedia: "
+daftar_disk
+echo -e "\033[33m"
+read -p "Pilih nomor disk yang akan digunakan: " disk_number
+echo -e "\033[0m"
+
+# Validasi nomor disk yang dipilih
+if ! [[ $disk_number =~ ^[0-9]+$ ]]; then
+    echo -e "\033[31mError: Pilihan disk tidak valid. Harap masukkan nomor disk yang valid.\033[0m"
+    exit 1
 fi
-mkdir -p $DIR_INSTALL
 
-if grep -q $PART_BOOT /proc/mounts ; then
-    echo "Unmounting BOOT partiton."
-    umount -f $PART_BOOT
-fi
-echo -n "Formatting BOOT partition..."
-mkfs.vfat -n "BOOT_EMMC" $PART_BOOT
-echo "done."
-
-mount -o rw $PART_BOOT $DIR_INSTALL
-
-echo -n "Cppying BOOT..."
-cp -r /boot/* $DIR_INSTALL && sync
-echo "done."
-
-echo -n "Edit init config..."
-sed -e "s/ROOTFS/ROOT_EMMC/g" \
- -i "$DIR_INSTALL/uEnv.ini"
-echo "done."
-
-rm $DIR_INSTALL/s9*
-rm $DIR_INSTALL/aml*
-
-umount $DIR_INSTALL
-
-if grep -q $PART_ROOT /proc/mounts ; then
-    echo "Unmounting ROOT partiton."
-    umount -f $PART_ROOT
-fi
-
-echo "Formatting ROOT partition..."
-mke2fs -F -q -t ext4 -L ROOT_EMMC -m 0 $PART_ROOT
-e2fsck -n $PART_ROOT
-echo "done."
-
-echo "Copying ROOTFS."
-mount -o rw $PART_ROOT $DIR_INSTALL
-cd /
-echo "Copy BIN"
-tar -cf - bin | (cd $DIR_INSTALL; tar -xpf -)
-echo "Create DEV"
-mkdir -p $DIR_INSTALL/dev
-echo "Copy ETC"
-tar -cf - etc | (cd $DIR_INSTALL; tar -xpf -)
-echo "Copy HOME"
-tar -cf - home | (cd $DIR_INSTALL; tar -xpf -)
-echo "Copy LIB"
-tar -cf - lib | (cd $DIR_INSTALL; tar -xpf -)
-echo "Copy LIB64"
-tar -cf - lib64 | (cd $DIR_INSTALL; tar -xpf -)
-echo "Create MEDIA"
-mkdir -p $DIR_INSTALL/media
-echo "Create MNT"
-mkdir -p $DIR_INSTALL/mnt
-echo "Copy OPT"
-tar -cf - opt | (cd $DIR_INSTALL; tar -xpf -)
-echo "Create PROC"
-mkdir -p $DIR_INSTALL/proc
-echo "Copy ROOT"
-tar -cf - root | (cd $DIR_INSTALL; tar -xpf -)
-echo "Create RUN"
-mkdir -p $DIR_INSTALL/run
-echo "Copy SBIN"
-tar -cf - sbin | (cd $DIR_INSTALL; tar -xpf -)
-echo "Copy SELINUX"
-tar -cf - selinux | (cd $DIR_INSTALL; tar -xpf -)
-echo "Copy SRV"
-tar -cf - srv | (cd $DIR_INSTALL; tar -xpf -)
-echo "Create SYS"
-mkdir -p $DIR_INSTALL/sys
-echo "Create TMP"
-mkdir -p $DIR_INSTALL/tmp
-echo "Copy USR"
-tar -cf - usr | (cd $DIR_INSTALL; tar -xpf -)
-echo "Copy VAR"
-tar -cf - var | (cd $DIR_INSTALL; tar -xpf -)
-sync
-
-echo "Copy fstab"
-rm $DIR_INSTALL/etc/fstab
-cp -a /root/install/fstab $DIR_INSTALL/etc/fstab
-
-rm $DIR_INSTALL/root/linux-tools/fstab
-rm $DIR_INSTALL/usr/bin/ddbr
-
-cd /
-sync
-umount $DIR_INSTALL
-
-echo "*******************************************"
-echo -e '\033[36mInstall selesai,\033[33m Rebooting\033[0m'
-echo "*******************************************"
-sleep 5
-reboot
+# Panggil fungsi untuk memformat disk, membuat partisi, dan memulihkan u-boot
+setup_disk
+copy_system
+finalize_installation
