@@ -91,7 +91,7 @@ fi
 echo -e "\033[33m"
 read -p "Masukkan ukuran mulai partisi BOOT (Contoh: 200M): " start_boot
 read -p "Masukkan ukuran akhir partisi BOOT (Contoh: 250M): " size_boot
-read -p "Masukkan ukuran partisi ROOT (Contoh: 1GB sd 100%): " size_root
+read -p "Masukkan ukuran partisi ROOT (Contoh: 1000M sd 100%): " size_root
 read -p "Masukkan label untuk partisi BOOT (Contoh: BOOT): " label_boot
 read -p "Masukkan label untuk partisi ROOT (Contoh: ROOTFS): " label_root
 echo -e "\033[0m"
