@@ -1,4 +1,7 @@
 # INSTALL
 ```sh
-git clone --recursive https://github.com/bug-sys/Linux-tools
+git clone --recursive --depth 1 https://github.com/bug-sys/Linux-tools
+```
+```sh
+sudo bash /root/linux-tools/main.sh
 ```
