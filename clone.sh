@@ -66,7 +66,7 @@ klon_sistem() {
 
 # Skrip utama
 echo -e "\033[32m*****************************************************"
-echo -e "\033[36m       Toolkit clone linux by SUIJUNG\033[0m"
+echo -e "\033[36m       Toolkit clone linux by bug-sys\033[0m"
 echo -e "\033[32m*****************************************************\033[0m"
 echo "Daftar disk yang tersedia: "
 daftar_disk
