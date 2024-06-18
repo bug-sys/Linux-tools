@@ -2,7 +2,7 @@
 
 echo "Start script create MBR and filesystem"
 
-DEV_EMMC=/dev/mmcblk0
+DEV_EMMC=/dev/mmcblk1
 
 echo "Start backup u-boot default"
 
