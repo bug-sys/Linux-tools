@@ -9,7 +9,7 @@ echo "Start backup u-boot default"
 dd if="${DEV_EMMC}" of=/boot/u-boot-default.img bs=1M count=4
 
 echo "Start Format EMMC"
-mkfs.ext4 -F "/dev/${DEV_EMMC}"
+mkfs.ext4 -F "${DEV_EMMC}"
 
 echo "Start create MBR and partittion"
 
