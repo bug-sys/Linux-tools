@@ -1,5 +1,4 @@
 #!/bin/sh
-set -e
 
 # Fungsi untuk menampilkan daftar disk yang tersedia
 daftar_disk() {
@@ -14,7 +13,7 @@ setup_disk() {
 
     # Validasi disk yang dipilih
     if [ -z "$chosen_disk" ]; then
-        echo -e "\033[31mError: Disk tidak ditemukan.\033[0m"
+        echo "\033[31mError: Disk tidak ditemukan.\033[0m"
         exit 1
     fi
 
@@ -70,7 +69,7 @@ copy_system() {
 
     # Mengedit konfigurasi uEnv.ini
     echo -n "Mengedit konfigurasi init..."
-    sed -e "s/ROOTFS/ROOT_EMMC/g" -i "$DIR_INSTALL/uEnv.ini"
+    sed "s/ROOTFS/ROOT_EMMC/g" -i "$DIR_INSTALL/uEnv.ini"
     echo "selesai."
 
     # Membersihkan file yang tidak diperlukan
@@ -102,26 +101,26 @@ finalize_installation() {
     umount $DIR_INSTALL
 
 echo "*******************************************"
-echo -e '\033[36mInstalasi selesai,\033[33m Rebooting\033[0m'
+echo '\033[36mInstalasi selesai,\033[33m Rebooting\033[0m'
 echo "*******************************************"
     sleep 5
     reboot
 }
 
 # Skrip utama
-echo -e "\033[32m*****************************************************"
-echo -e "\033[36m  Toolkit Install armbian ke Internal by bug-sys\033[0m"
-echo -e "\033[32m*****************************************************\033[0m"
+echo "\033[32m*****************************************************"
+echo "\033[36m  Toolkit Install armbian ke Internal by bug-sys\033[0m"
+echo "\033[32m*****************************************************\033[0m"
 
 echo "Daftar disk yang tersedia: "
 daftar_disk
-echo -e "\033[33m"
+echo "\033[33m"
 read -p "Pilih nomor disk yang akan digunakan: " disk_number
-echo -e "\033[0m"
+echo "\033[0m"
 
 # Validasi nomor disk yang dipilih
 if ! [[ $disk_number =~ ^[0-9]+$ ]]; then
-    echo -e "\033[31mError: Pilihan disk tidak valid. Harap masukkan nomor disk yang valid.\033[0m"
+    echo "\033[31mError: Pilihan disk tidak valid. Harap masukkan nomor disk yang valid.\033[0m"
     exit 1
 fi
 
