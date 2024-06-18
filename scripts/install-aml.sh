@@ -90,9 +90,9 @@ finalize_installation() {
 
     # Membersihkan file-file yang tidak diperlukan
     rm $DIR_INSTALL/etc/fstab
-    cp -a /root/install/fstab $DIR_INSTALL/etc/fstab
+    cp -a /root/Linux-tools/fstab $DIR_INSTALL/etc/fstab
 
-    rm $DIR_INSTALL/root/linux-tools/fstab
+    rm $DIR_INSTALL/root/Linux-tools/fstab
     rm $DIR_INSTALL/usr/bin/ddbr
 
     sync
